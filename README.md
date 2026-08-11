@@ -1,5 +1,8 @@
 # Spotlight - Part B: Funds, Sentiment & App (z5640476)
 
+**Live app:** https://spotlight-z5640476.streamlit.app
+**Repository:** https://github.com/corvus-chen/z5640476_projectB
+
 Part B of the FINS5545 project (DFF Stations 3-4). Spotlight is a systematic
 multi-asset investment app: it offers twelve funds built from the Part A data
 foundation, each backtested out-of-sample, plus a standalone news-sentiment
@@ -68,8 +71,9 @@ help, and both reported gross and net of a 10 bp turnover cost:
    and the return it can be traded on is negative in eight of ten sectors.
    Rather than hard-code the reverse, the adaptive tilt re-estimates that
    correlation at each rebalance from the prior year only and leans whichever
-   way the window says. It lifts the Maximum-Sharpe fund from 0.586 to 0.673
-   (0.565 to 0.650 after costs) and is covered by the truncation test.
+   way the window says. It lifts the Maximum-Sharpe fund from 0.573 to
+   0.658 (0.552 to 0.636 after costs), though a bootstrap
+   interval for that difference spans zero. Covered by the truncation test.
 
 The two do not stack: the lexicon helps the fixed tilt but hurts the adaptive
 one, because part of the contrarian edge came from VADER's blind spots.

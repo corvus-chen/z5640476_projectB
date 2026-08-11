@@ -480,7 +480,13 @@ def prose(n: dict) -> dict[str, list[str]]:
 
             "The business model is a management fee on assets, shown "
             "explicitly in the allocation tab so the user can see what the "
-            "product costs them."
+            "product costs them.",
+
+            "Spotlight is deployed at https://spotlight-z5640476.streamlit.app "
+            "from the public repository "
+            "https://github.com/corvus-chen/z5640476_projectB. The app reads "
+            "the committed artifacts and starts without recomputing anything, "
+            "so it runs inside Community Cloud's free-tier resources."
         ],
         # ---------------------------------------------------------------
         "reflection": [
