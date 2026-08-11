@@ -1,0 +1,50 @@
+term,score,category,rationale
+gain,2.4,already-in-vader,VADER +2.4 already suits the market sense
+estimates,0.0,excluded-neutral,neutral noun; the verb beside it carries sign
+guidance,0.0,excluded-neutral,"direction comes from raise/cut, not the noun"
+crash,-2.9,mis-scored,VADER -1.7 (car crash); a market crash is worse
+miss,-2.0,mis-scored,VADER -0.6 (missing a bus); an earnings miss is harsher
+missed,-1.9,mis-scored,VADER -1.2; same correction
+misses,-2.0,mis-scored,VADER -0.9; same correction
+bankruptcy,-3.3,missing,terminal corporate outcome
+bear,-1.3,missing,as above; VADER has no animal-sense entry either
+bearish,-2.1,missing,explicit market-direction stance
+beat,2.2,missing,earnings beat - the single strongest routine positive
+beats,2.2,missing,"as above, plural/verb form"
+bull,1.3,missing,"as above, weaker as a noun ('bull market')"
+bullish,2.1,missing,explicit market-direction stance
+buyback,1.6,missing,"capital return, read positively"
+dividend,1.1,missing,"cash return to shareholders; 6,742 occurrences"
+downgrade,-2.3,missing,"explicit analyst action, unambiguously negative"
+downgrades,-2.3,missing,as above
+drops,-1.3,missing,VADER scores 'drop' but not 'drops'
+fall,-1.2,missing,"mild downward move, mirrors rise"
+falls,-1.2,missing,as above
+fraud,-3.2,missing,"already implied by VADER's related words, but the bare noun is unscored"
+halt,-1.5,missing,"trading halt, negative in a headline"
+higher,1.3,missing,"mild upward move; 3,165 occurrences"
+jump,1.7,missing,moderate upward move
+jumps,1.7,missing,as above
+layoffs,-2.2,missing,"negative for workers; ambiguous for the share price, scored on the news tone"
+outperform,2.0,missing,rating and relative-performance language
+plunge,-2.8,missing,"large downward move, mirrors soar"
+plunges,-2.8,missing,as above
+probe,-1.4,missing,"regulatory investigation, mildly negative"
+rally,1.9,missing,sustained upward move
+recall,-2.0,missing,product failure event
+rise,1.2,missing,mild upward move
+rises,1.2,missing,as above
+sink,-2.2,missing,downward move
+sinks,-2.2,missing,as above; 445 occurrences
+slump,-2.2,missing,sustained downward move
+soar,2.8,missing,"large upward move, strong intensity"
+soars,2.8,missing,as above
+surge,2.4,missing,large upward move
+surges,2.4,missing,as above
+tumble,-2.4,missing,large downward move
+tumbles,-2.4,missing,as above
+underperform,-2.0,missing,"as above, negative side"
+upgrade,2.3,missing,"explicit analyst action, unambiguously positive"
+upgrades,2.3,missing,as above
+volatile,-1.1,missing,"risk language, mildly negative for investors"
+volatility,-1.0,missing,as above
