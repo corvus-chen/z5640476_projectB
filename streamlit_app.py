@@ -88,12 +88,17 @@ def load_artifacts(stamp: tuple) -> dict:
     lexicon_effect = pd.read_csv(TABLES / "lexicon_effect.csv")
     fear_greed = pd.read_csv(DATA / "fear_greed_index.csv", parse_dates=["date"])
     holdout = pd.read_csv(TABLES / "discovery_holdout.csv")
+    timing = pd.read_csv(TABLES / "fear_greed_timing.csv")
+    timing_validation = pd.read_csv(TABLES / "fear_greed_validation.csv")
+    exposure = pd.read_csv(DATA / "fear_greed_exposure.csv", parse_dates=["date"])
     return {"returns": returns, "weights": weights, "metrics": metrics,
             "sentiment": sentiment, "fusion": fusion,
             "diagnostics": diagnostics, "coverage": coverage,
             "sentiment_ext": sentiment_ext, "extensions": extensions,
             "lexicon": lexicon, "lexicon_effect": lexicon_effect,
-            "fear_greed": fear_greed, "holdout": holdout}
+            "fear_greed": fear_greed, "holdout": holdout,
+            "timing": timing, "timing_validation": timing_validation,
+            "exposure": exposure}
 
 
 def metrics_from_returns(r: pd.Series, days: int = 252) -> dict:
@@ -567,7 +572,72 @@ with tab_lab:
         "VADER's blind spots, so combining them gives back the gain."
     )
 
-    st.markdown("#### 3. Checking the winner was found, not fitted")
+    st.markdown("#### 3. Reading the market's mood, not just its sectors")
+    st.write(
+        "Everything above asks which sector to overweight, and the answer is "
+        "that headlines do not say. A different question is when to hold less "
+        "of the market at all. The fear and greed gauge answers that one, and "
+        "it is the only signal in Spotlight that survives a significance test."
+    )
+    tm = art["timing"]
+    v = art["timing_validation"].iloc[0]
+
+    k1, k2, k3 = st.columns(3)
+    k1.metric("Funds improved", f"{int((tm.sharpe_timed_net > tm.sharpe_base).sum())} of {len(tm)}")
+    k2.metric("Average exposure held", pct(tm["mean_exposure"].iloc[0]))
+    k3.metric("Beats random timing", f"{v['share_beaten']:.0%}",
+              f"of {int(v['n_perm'])} shuffles")
+
+    st.dataframe(
+        tm[["fund", "sharpe_base", "sharpe_timed_net",
+            "max_drawdown_base", "max_drawdown_timed"]],
+        hide_index=True, width="stretch",
+        column_config={
+            "fund": "Fund",
+            "sharpe_base": st.column_config.NumberColumn("Sharpe, no overlay", format="%.3f"),
+            "sharpe_timed_net": st.column_config.NumberColumn("Sharpe, timed (net)", format="%.3f"),
+            "max_drawdown_base": st.column_config.NumberColumn("Drawdown, no overlay", format="%.1f%%"),
+            "max_drawdown_timed": st.column_config.NumberColumn("Drawdown, timed", format="%.1f%%"),
+        },
+    )
+    st.caption(
+        "The overlay moves money toward cash as the gauge turns greedy and "
+        "resets on the first trading day of each month. It never borrows, so "
+        "the most it can do is hold less. Every fund improves after costs and "
+        "every drawdown gets shallower."
+    )
+
+    exp = art["exposure"].set_index("date")["exposure"] * 100
+    st.line_chart(exp.rename("Equity exposure (%)"), height=260,
+                  color=SERIES[0], x_label="Date", y_label="% of fund held")
+    st.caption(
+        f"Exposure over the backtest. The fund is fully invested most of the "
+        f"time and cuts to as little as {exp.min():.0f}% when coverage turns "
+        f"euphoric."
+    )
+
+    with st.expander("Why this is not luck, and what still limits it"):
+        st.markdown(
+            f"""
+- **Shuffling the timing destroys it.** Keeping the same exposure values and
+  the same turnover but reordering them at random gives a mean Sharpe of
+  {v['perm_mean']:.3f} across {int(v['n_perm'])} permutations, with a best
+  case of {v['perm_max']:.3f}. The real ordering reaches
+  {v['sharpe_actual']:.3f} and beats every one of them.
+- **The improvement clears a bootstrap test.** The difference against the base
+  fund is {v['boot_difference']:+.3f} with a 95% interval of
+  [{v['boot_ci_low']:+.3f}, {v['boot_ci_high']:+.3f}] and p = {v['boot_p_value']:.3f}.
+- **It is not simply holding less.** Scaling a fund by a constant leaves the
+  Sharpe ratio unchanged, so the gain has to come from when the exposure moves.
+- **What limits it.** About ten rules were tried before this one, so the
+  p-value would not survive a correction across all of them. The overlay makes
+  36 monthly decisions, and the sample contains one large drawdown year, which
+  is the period any de-risking rule flatters most.
+"""
+        )
+    st.divider()
+
+    st.markdown("#### 4. Checking the winner was found, not fitted")
     st.write(
         "Comparing five variants over one period and keeping the best is "
         "itself a choice fitted to that period. The harder test: pick the "
