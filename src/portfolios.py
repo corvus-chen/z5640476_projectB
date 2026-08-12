@@ -313,6 +313,48 @@ def rebalance_frequency_study(panel: pd.DataFrame, methods=METHODS,
     return pd.DataFrame(rows)
 
 
+def window_study(panels: dict[str, pd.DataFrame],
+                 methods=("min_variance", "max_sharpe", "risk_parity"),
+                 min_window: int = DEFAULT_WINDOW) -> pd.DataFrame:
+    """Rolling against expanding estimation windows.
+
+    Section 2 argues the estimation sample is too thin, which invites the
+    obvious question: why not simply use a longer one? An expanding window is
+    the cheapest way to answer it, and the answer is not the same for every
+    universe. More history means less estimation noise but a longer memory of
+    a regime that may have ended, and the two effects pull in opposite
+    directions depending on how stable the assets are.
+    """
+    rows = []
+    for family, panel in panels.items():
+        days = FAMILY_DAYS_PER_YEAR[family]
+        dates = panel.index
+        rebals = rebalance_dates(dates, days, "monthly")
+        for method in methods:
+            rolling = oos_backtest(panel, method=method, window=days)
+            # Same engine, but the estimation slice starts at the first
+            # observation instead of `days` back.
+            daily = []
+            for i, t in enumerate(rebals):
+                pos = dates.get_loc(t)
+                w = optimise_weights(panel.iloc[:pos], method)
+                end = (dates.get_loc(rebals[i + 1]) if i + 1 < len(rebals)
+                       else len(dates))
+                held = panel.iloc[pos:end].fillna(0.0)
+                value = (1.0 + held).cumprod() @ w
+                period = value / value.shift(1)
+                period.iloc[0] = value.iloc[0]
+                daily.append(period - 1.0)
+            expanding = pd.concat(daily)
+
+            r = performance_metrics(rolling["returns"], days)["sharpe"]
+            e = performance_metrics(expanding, days)["sharpe"]
+            rows.append({"family": family, "method": METHOD_LABELS[method],
+                         "sharpe_rolling": r, "sharpe_expanding": e,
+                         "change": e - r})
+    return pd.DataFrame(rows)
+
+
 def shrinkage_study(panels: dict[str, pd.DataFrame],
                     methods=("min_variance", "max_sharpe", "risk_parity"),
                     window: int = DEFAULT_WINDOW) -> pd.DataFrame:

@@ -43,14 +43,46 @@ Maximum-Sharpe 0.587 to 0.522, with turnover rising in both.
 - Risk to remember: the app must not import the scoring library. The hand-in
   checker flagged `streamlit_app.py` because a docstring mentioned it by name,
   even though nothing was imported - reworded.
-- [my own review notes go here]
+- The real risk in this entry is not any of the bugs above. It is the
+  explanation I accepted for the negative fusion result, which I later found
+  was wrong. That is written up in full below.
 
 ## What I changed and why
-[for me to fill in after I review the code]
+I stopped looking for evidence that supported the explanation and asked for a
+test that could separate it from the alternatives instead. The lead-lag test
+in log_05 came out of that, and it is what showed the reading in this entry to
+be wrong.
 
 ## The negative result - my reading
-The fusion underperforms and the diagnostics say why: the correlation between
-lagged sector sentiment and the sector return it is usable for is negative in
-eight of ten sectors (Energy -0.071, Industrials -0.039; only Consumer and
-Materials are positive). [my own economic interpretation goes here - do not
-let the assistant write this]
+At this stage I concluded that the fusion failed because headline sentiment
+works as a contrarian indicator: the correlation between lagged sector
+sentiment and the return it can be traded on is negative in eight of ten
+sectors (Energy -0.071, Industrials -0.039; only Consumer and Materials
+positive).
+
+That explanation was wrong, and the way it was wrong is the thing worth
+recording. It did not contradict a single number I had. The eight negative
+sectors supported it, the losing tilt supported it, and reversing the tilt
+made money, which supported it again. Every piece of evidence I held pointed
+the same way.
+
+What I had not done was compare it against anything. A negative correlation is
+equally consistent with a reversal, with news that is already in the price,
+and with noise, and the one statistic I was looking at - the lagged
+correlation - cannot tell those three apart. I was accumulating confirmation
+rather than testing a hypothesis, and confirmation is available for a wrong
+answer as readily as for a right one.
+
+The test that settled it looked at the same sentiment against the sector
+return on the day before, the same day, and the next day, because the three
+explanations leave different fingerprints across those three points.
+Same-day correlation is +0.089 and significant in seven of ten sectors;
+next-day is -0.013 and significant in one. A reversal would need a
+significant negative NEXT-day coefficient and there is not one. The news is
+real information that the market has already absorbed by the close, and the
+negative signs I had built a story on are mostly noise around zero.
+
+The lesson I take from it is that an explanation which fits all the evidence
+is not thereby correct - it has to be the one that survives when a test is
+built to distinguish it from its rivals. I should design that test before I
+am satisfied with an explanation, not after.

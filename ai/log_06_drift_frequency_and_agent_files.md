@@ -70,11 +70,45 @@ log-session), plus a pointer to them from CLAUDE.md.
   `tests/test_app_charts.py` now maxes out every selection.
 - Two figures had burst past A4 width because explanatory prose was appended
   to the source footer, which never wraps.
-- [my own review notes go here]
+- Both of the serious items here have the same shape, and it is not "we found
+  bugs later". Both had already been checked, and the check is what gave the
+  false confidence. The drift bug had a docstring, and the docstring was
+  accurate: it stated that weights were held at their targets between
+  rebalances. It described what the code did and nobody asked whether that was
+  the right thing to do, so accurate documentation of wrong behaviour read
+  exactly like correct behaviour. The app crashes had tests, and the tests
+  passed - but every default selection in the app sits at five items or fewer,
+  which is just below the threshold where the colour bug fires, so the suite
+  was confirming that the defaults work rather than that the app works.
+- What follows for me is that a check is only worth what its coverage is
+  worth. Documentation verifies nothing on its own, and a green test suite
+  says only that the cases it contains pass. Both failures needed a standard
+  from outside the code to expose them.
 
 ## What I changed and why
-[for me to fill in after I review the code]
+I ordered both audits that found these problems, and neither would have
+happened on the assistant's initiative. It had already finished this work and
+considered it correct. I told it to read the Week 10 revision lecture in full
+and then to check the build against the brief and that lecture line by line,
+and that is the pass that turned up the drift accounting, the missing fear and
+greed index, the missing discovery/holdout split, and the exhibit that did not
+meet the "across methods" requirement.
+
+I also refused the fix on inspection. The assistant's explanation of the drift
+correction was convincing and I asked for identity checks with known answers
+instead - a single-asset fund must reproduce its only holding, and period
+growth must equal the weighted product of asset growth. Those are now
+permanent tests rather than one-off confirmations.
 
 ## Frequency choice - my reading
-Monthly stays the headline schedule. [my own justification goes here - the
-study is in results/tables/rebalance_frequency.csv]
+Monthly stays the headline schedule, and the study is what lets me say that
+rather than assume it. Quarterly loses everywhere, so the cost of carrying a
+three-month-old covariance estimate is real. Above that floor the choice only
+matters for the funds that actually move: equal weight and risk parity are
+flat across every schedule because their weights barely change, while maximum
+Sharpe turns over several times a year and is the one fund where the decision
+has a price. Monthly is its best net-of-cost schedule, and it is within a few
+hundredths of the best for every other fund, so it is the schedule that costs
+least where it matters most. Weekly buys a fresher estimate that the extra
+turnover does not repay - which is the same estimation-error argument from
+Section 2 showing up in the trading decision rather than in the weights.

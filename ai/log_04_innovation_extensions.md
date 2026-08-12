@@ -68,10 +68,45 @@ it after transaction costs (0.650 against 0.565 on Maximum-Sharpe).
   Headline-level scoring cannot read that.
 - Reading the best of five variants off one out-of-sample period is itself a
   selection effect. It belongs in the report as a caveat, not as a claim.
-- [my own review notes go here]
+- The -1 direction at all 36 rebalances is the item I now weigh most heavily,
+  and my defence of it at the time was weaker than I thought. Saying the sign
+  would have flipped had the window said otherwise is a claim about a branch
+  of the code that never executed on this data. The mechanism is correct and
+  the truncation test proves it never looks forward, but on this sample it was
+  never exercised in both directions, and that is a limitation of the evidence
+  rather than a point in the method's favour.
+- The numbers in this entry predate the weight-drift fix in log_06 and no
+  longer match results/. They are left as recorded.
 
 ## What I changed and why
-[for me to fill in after I review the code]
+I chose the adaptive tilt over the lexicon extension as the primary
+innovation, against the assistant's initial framing, because the lexicon is
+named twice in the brief as an example and would therefore be the crowded
+choice, while the adaptive tilt came out of a diagnostic in my own data. I
+also cut the lexicon down: the assistant proposed scoring every frequent
+finance term and I had it exclude the ones whose sign reverses with context,
+on the grounds that a smaller list I can defend beats a longer one I cannot.
+
+## How I would rate this extension now
+Two things are true about the adaptive tilt and neither is "it worked".
+
+It is methodologically sound and cannot be shown to be effective. The design
+is right - the direction is estimated walk-forward from past data only, the
+truncation test covers it, and the result is reported gross and net of costs.
+The result is a Sharpe improvement whose bootstrap interval spans zero
+(p = 0.337 and 0.749), on a relationship that the later lead-lag test shows is
+mostly noise. So the value sits in the process rather than the outcome:
+building it correctly, and then reporting honestly that three years of daily
+data cannot establish it, is the part I would defend.
+
+Its larger contribution was to expose problems rather than to solve one.
+Building it is what made me ask whether the improvement was bigger than noise,
+which produced the bootstrap test; and asking why it worked at all is what
+produced the lead-lag test, which overturned the contrarian explanation I had
+been carrying since log_03. Neither of those checks would exist if I had
+stopped at the naive tilt and its negative result. The extension earned its
+place by generating the tests that showed the rest of my reasoning to be
+wrong.
 
 ## The interaction between the two extensions - my reading
 The two extensions do not stack: the lexicon helps the fixed tilt (0.522 to
@@ -79,4 +114,10 @@ The two extensions do not stack: the lexicon helps the fixed tilt (0.522 to
 diagnostics show why - the extended lexicon weakens the very contrarian
 relationship the adaptive tilt trades, with the mean correlation moving from
 -0.0205 to -0.0156 and the count of negative sectors from 8/10 to 7/10.
-[my own economic interpretation goes here]
+
+Read alongside the lead-lag result, that interaction is less puzzling than it
+first looked. Part of what the adaptive tilt was trading was VADER's blind
+spots rather than a property of the news, so making the sentiment measurement
+more faithful removed some of the very thing the tilt was leaning on. An edge
+that shrinks when the input is improved was probably not an edge in the
+market.

@@ -37,7 +37,39 @@ foundation (cleaning + return panels + headline alignment) into
 - The assistant first wrote "30 rows dropped" in a docstring from memory of
   Part A; the smoke test showed the true count is 6, and it corrected the
   docstring. Unverified numbers must always be re-run, not recalled.
-- [my own review notes go here]
+- The count itself was harmless in a docstring. What it would not have been
+  harmless in is the report. My CLAUDE.md requires every number to trace back
+  to the data or to a computation I can re-run, and a figure copied out of a
+  docstring satisfies neither - I would have had no way of telling, later,
+  whether "30" came from a measurement or from a recollection. The damage of
+  this kind of error is not that it is large, it is that it is untraceable.
+- The mistake was not misremembering Part A. The Part A figure was right for
+  Part A; it was carried into Part B, where the alignment code differs and the
+  answer is 6. Conclusions do not travel between projects even when the data
+  and the author are the same.
+- This belongs to the same family as the failures later in the project. The
+  solver that silently returns its starting point, the docstring that
+  accurately describes the wrong behaviour, the test suite that only exercises
+  defaults, and this recalled number are all the same thing: something
+  asserted without being checked against the data in front of it. The form
+  changes and the cause does not.
 
 ## What I changed and why
-[for me to fill in after I review the code]
+I decided to reuse my own Part A foundation rather than rewrite it, which the
+brief allows, but I attached a condition: everything carried over has to be
+re-measured on this project's code path, not trusted because it was right
+before. That condition is what produced the shape of `src/etl.py`. Part A's
+cleaning rules are not re-implemented there as prose or as comments; they are
+re-applied as guards that raise if the data no longer satisfies them - the
+2023-12-31 cap, uniqueness on ticker and date, the balanced panel, the
+deduplication on ticker plus date plus title. If the hosted data ever changes
+under me, the pipeline stops rather than producing a quietly different answer.
+
+The dropped-headline count is the small example of exactly the condition I had
+set, arriving in the first hour of the project. The rule was already the right
+one; what I learned is that it applies to the assistant's memory of my own
+earlier work as much as to the data.
+
+I also fixed the language rule at this point: everything in the folder -
+code, comments, report, agent files, and these logs - is written in English,
+with Chinese used only in conversation.

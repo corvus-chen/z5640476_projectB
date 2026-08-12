@@ -74,10 +74,16 @@ def main() -> None:
 
     # Does fixing the covariance noise fix the result? Tests the Section 2
     # diagnosis rather than asserting it.
-    shrinkage = pf.shrinkage_study({k: v for k, v in panels.items()
-                                    if k in ("Equity", "Combined")})
+    sub_panels = {k: v for k, v in panels.items() if k in ("Equity", "Combined")}
+    windows = pf.window_study(sub_panels)
+    windows.to_csv(TABLES / "window_study.csv", index=False)
+    shrinkage = pf.shrinkage_study(sub_panels)
     shrinkage.to_csv(TABLES / "shrinkage_study.csv", index=False)
     helped = shrinkage[shrinkage["change"] > 0.005]["method"].unique()
+    worst = windows.loc[windows["change"].idxmin()]
+    t0 = _step(f"window study: expanding helps equities "
+               f"(min-var {windows.loc[(windows.family=='Equity') & (windows.method=='Minimum-Variance'), 'change'].iloc[0]:+.3f}) "
+               f"but costs {worst['family']} {worst['method']} {worst['change']:+.3f}", t0)
     t0 = _step("shrinkage study: helps " + (", ".join(helped) or "nothing")
                + f"; largest gain {shrinkage['change'].max():+.3f} Sharpe", t0)
 

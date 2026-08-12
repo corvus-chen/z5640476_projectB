@@ -37,7 +37,31 @@ Crypto Maximum-Sharpe loses money, at -26.3% a year.
   Sharpe of +0.01. That looked like a bug. It is the volatility drag: at 79%
   annualised volatility the arithmetic mean (+1.1%) and the geometric mean
   diverge sharply. The fix was reporting both, not changing the formula.
-- [my own review notes go here]
+- The numbers in this entry were measured BEFORE the weight-drift fix in
+  log_06 and no longer match results/. They are left as recorded because the
+  point of the log is what I saw at the time.
+
+- What makes the first two items dangerous is not that they were hard. It is
+  that both would have been invisible. A stalled solver returns four
+  identical equal-weight funds and every downstream table still renders; a
+  fund with a positive Sharpe ratio and a negative annualised return reads
+  like a typing error rather than a real property of a volatile asset. Neither
+  announces itself. I only found the first because the brief told me where to
+  look, which means the failures I should worry about most are the ones nobody
+  has warned me about in advance.
+- The second one carried the greater risk of the two, because the wrong
+  response was the tempting one. Making the two numbers agree would have
+  "fixed" a result that was already correct, and the report would have been
+  wrong in a way no test could catch. Deciding a surprising number is a bug is
+  a decision, and it needs evidence like any other.
+- The truncation test is not a finding, it is the reason the rest of the entry
+  can be trusted. It is the only check here that fails loudly.
 
 ## What I changed and why
+I set the working method for this stage and kept to it: the assistant explains
+the approach in full first, I read it until I understand it and correct what I
+disagree with, and only then does it write code. That order is what let me
+catch things at the design stage rather than in the output, and it is why the
+solver-scaling and volatility-drag items above are recorded as decisions
+rather than as bugs found later.
 [for me to fill in after I review the code]
