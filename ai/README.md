@@ -66,5 +66,11 @@ than of modelling:
   that only ever exercised the defaults (log_06)
 - prose that reads as reasoned whether or not it was reasoned (log_07)
 
+log_08 closes the loop from the other side. Re-running my funds on the
+lecture's expanding window reproduces its published Sharpe ratios to within
+0.024 on average, and to 0.002 on the fund where our headline numbers differ
+most. That is the first check in this project whose standard came from outside
+it.
+
 `../report/REVISION_CHECKLIST.md` tracks the passages of the report that are
 still the assistant's wording rather than mine.
