@@ -72,8 +72,46 @@ records which are done.
 - The DeMiguel, Garlappi and Uppal (2009) citation came from the Week 10
   lecture's reference list, not from my own reading. Verify the paper's actual
   finding before it enters the bibliography.
-- [my own review notes go here]
+- The risk I am carrying knowingly is that fluent prose written from correct
+  numbers reads as though it were reasoned, whether or not I have reasoned it.
+  Nothing in the document marks which passages are mine, so the checklist and
+  the proportion recorded below are the only record of that, and they are only
+  worth anything if I keep them accurate as I work.
 
 ## What I changed and why
-[to fill in as I work through REVISION_CHECKLIST.md - record which passages I
-rewrote, which I rejected outright, and why]
+
+I worked through the report in Word rather than through the prose file. A
+paragraph-by-paragraph comparison against the assistant's original draft puts
+the current state at 15 of 46 substantial passages materially rewritten, ten
+of them heavily; the remaining 31 still carry its wording. That measurement is
+in this entry because I would rather state the proportion than imply a
+completeness I have not reached.
+
+The reasoning in Section 2 is mine. I rejected the "estimation error" framing
+and replaced it with sample noise, because the problem is the size of the
+sample rather than a fault in the estimator: 252 days asked to produce 50
+expected returns and a 50-by-50 covariance matrix. I took the two-cause
+reading of the method ordering over the single-cause one, because the
+single-cause version is contradicted by minimum variance scoring below maximum
+Sharpe on fewer estimated parameters. And I settled the minimum-variance
+paragraph on my own position - the fund is not a failure but a product for a
+different investor, which is also why the app lists all twelve funds rather
+than only the top of the Sharpe table.
+
+Working in Word I then added the citation layer that the draft did not have:
+Michaud (1989) on error maximisation and Chopra and Ziemba (1993) on
+expected-return errors being roughly an order of magnitude more costly than
+variance errors, which together turn Section 2 from an assertion about noise
+into an argument with a mechanism; Loughran and McDonald (2011) on
+out-of-domain dictionaries misclassifying financial language; Tetlock,
+Saar-Tsechansky and Macskassy (2008) on full stories rather than headlines;
+Bailey and Lopez de Prado (2014) and Harvey, Liu and Zhu (2016) on what a
+maximum Sharpe ratio means once the number of trials is counted; Da, Engelberg
+and Gao (2015), Fama (1970), Boudoukh et al. (2008), and Okabe and Ito (2008)
+elsewhere. Several of those passages were rewritten around the citation rather
+than having it appended, which is why they now differ most from the draft.
+
+What is still the assistant's wording is listed in
+`report/REVISION_CHECKLIST.md`, and the passages I would most want in my own
+words before submission are the three recommendations and the reflection in
+Section 7, since those are judgments about a product I designed.

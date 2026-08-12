@@ -64,4 +64,3 @@ disagree with, and only then does it write code. That order is what let me
 catch things at the design stage rather than in the output, and it is why the
 solver-scaling and volatility-drag items above are recorded as decisions
 rather than as bugs found later.
-[for me to fill in after I review the code]

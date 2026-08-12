@@ -57,10 +57,45 @@ not collapse the way the lecture's example did.
   cross-sectional across the ten sectors where the lecture standardises each
   stock over a rolling window. The brief allows both ("choose your own window
   type"), but I need to state the choice.
-- [my own review notes go here]
+- Before this audit ran, everything passed. The 16 tests were green,
+  check_handin reported 23 of 23, and the assistant had told me the baseline
+  was complete. None of that was wrong; it was just answering a different
+  question. Automated checks confirm that files exist and that code does what
+  the code says, and every standard they enforce was written inside this
+  project - my own tests, the starter's checker. The four gaps existed only
+  relative to something outside it. A project cannot audit itself against a
+  requirement it has never read.
+- The four gaps are not the same kind of thing, and the fear and greed index
+  is the one that matters most. The other three were wrong or incomplete work:
+  a drift assumption, a missing robustness split, an exhibit built for one
+  method instead of several. Those have artefacts. Somebody looking at them
+  can see they are wrong. An absence has no artefact at all - no test fails
+  for analysis that was never written, and no checker reports a deliverable
+  nobody attempted. Errors are found by inspection; omissions can only be
+  found by comparison against a list.
 
 ## What I changed and why
-[for me to fill in after I review the code]
+I ordered the comparison, and it is the single decision in this project that
+returned the most. The assistant considered the work finished; I told it to
+read the Week 10 lecture in full and then check the build line by line against
+that lecture and the brief. That pass produced all four gaps.
+
+I also decided what to do about the two places where my design differs from
+the lecture's reference implementation, and in one case the answer was to
+measure rather than to argue. The rolling estimation window stays, but Section
+2 claims the estimation sample is too thin, and a marker is entitled to ask
+why I did not simply use a longer one. Appendix D now answers that with the
+test rather than an assertion: an expanding window lifts the equity funds by
+up to +0.110 of a Sharpe ratio and costs the flagship Combined Maximum-Sharpe
+fund 0.583, because it never forgets the crypto regime that ended in 2022. The
+combined fund is the product, so the rolling window stays - and the main
+finding survives either way, which is the part that matters.
+
+The cross-sectional z-score stays as it is. The lecture standardises each
+stock over a rolling window; my tilt moves weight between sectors and takes no
+view on the market, so standardising across sectors on the day is the
+transformation that matches what the tilt actually does. That is a difference
+in design, not a deviation to apologise for, and the report states it.
 
 ## Verified references from the lecture
 The lecture supplies the citations for the methods I use, which I can cite
