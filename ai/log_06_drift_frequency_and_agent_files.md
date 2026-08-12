@@ -1,4 +1,4 @@
-# Prompt log 06 - the weight-drift fix, rebalance frequency, and my agent files
+1# Prompt log 06 - the weight-drift fix, rebalance frequency, and my agent files
 
 ## What I wanted
 After checking my build against the brief and the Week 10 lecture, three gaps

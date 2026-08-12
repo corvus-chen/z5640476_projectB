@@ -4,11 +4,58 @@ Every passage below is interpretive prose the assistant drafted at my request
 and I have not yet rewritten. The course grades my economic reasoning, so a
 passage is only finished once it says what I think, in my words.
 
-Edit `scripts/report_prose.py` and re-run
-`python scripts/build_report_scaffold.py`, or edit `report/report.docx`
-directly and stop running the script. Do not do both.
-
 Tick a box only after rewriting, not after reading.
+
+## STOP - read this before touching anything (state as of 11 Aug, 23:50)
+
+**`report/report.docx` is now the single source of truth. Do NOT run
+`python scripts/build_report_scaffold.py` again - it would overwrite the
+citations I added in Word.** `scripts/report_prose.py` is now historical: it
+holds the assistant's original draft, not what is in the document.
+
+The old pre-citation version is recoverable from git commit `38e6871` if
+anything goes wrong.
+
+### Open problem: the report is over the word limit
+
+| | words |
+|---|---|
+| Narrative as counted | 5,508 |
+| less the auto-generated Contents field | -131 |
+| **Real narrative** | **~5,377** |
+| Limit | 5,000 |
+| **Over by** | **~377** |
+
+References and the Appendix do not count. The two heaviest sections are
+Section 5 (1,339) and Section 2 (1,123), together 46% of the narrative.
+
+### Trim plan, ready to execute (paragraph indices from python-docx)
+
+1. **Move all of 5.5 "The figure design system" to the Appendix** - paragraphs
+   126 (93w) and 127 (65w). Saves ~158. It is the least central extension and
+   reads naturally as an appendix note.
+2. **Paragraph 44** (241w, "The first is sample noise") - now the longest in
+   the report after I added Michaud and Chopra-Ziemba. The mechanism is
+   explained again in 5.4; cut the overlap here and keep the citations.
+   Target ~60.
+3. **Paragraph 119** (135w, "Three caveats belong with that") - three caveats
+   stated at length; the third repeats the bootstrap point from 5.2.
+   Target ~40.
+4. **Paragraph 61** (126w, the three weights panels) - describes what the
+   figure already shows. Target ~30.
+5. **Paragraph 73** (160w, neutral share) and **paragraph 71** (141w, raw
+   gauge) in Section 3 - both restate their exhibits. Target ~50 between them.
+
+That totals roughly 340. The remainder can come from anywhere in Section 5.
+
+### New citations I added and still have to verify
+
+- **Michaud (1989)**, the error-maximisation property.
+- **Chopra and Ziemba (1993)**, errors in expected returns being about an
+  order of magnitude more costly than errors in variances.
+
+Both are load-bearing in paragraph 44 now. Confirm the exact claims and the
+publication details before the bibliography is final.
 
 ## How to rewrite a passage
 
@@ -26,11 +73,16 @@ defend if a marker asks "how do you know?".
 
 ## Section 2 - out-of-sample results
 
-- [x] `metrics_table` - DONE. I chose the two-cause reading and the term
-      "sample noise"; the DeMiguel estimation-window figure and the
-      shrinkage bridge were added on that basis. Paragraph on minimum
-      variance rewritten to my 'different investor, not a failure' position.
-      Remaining: read the DeMiguel paper before the citation is final.
+- [x] `metrics_table` - DONE, and extended in Word. I chose the two-cause
+      reading and the term "sample noise"; the DeMiguel estimation-window
+      figure and the shrinkage bridge followed from that. The minimum-variance
+      paragraph is my 'different investor, not a failure' position. In Word I
+      then added Michaud (1989) on error maximisation and Chopra and Ziemba
+      (1993) on the relative cost of mean versus variance errors, which is the
+      strongest passage in the report and the one that now needs trimming
+      rather than expanding.
+      Remaining: verify DeMiguel, Michaud, and Chopra-Ziemba against the
+      papers themselves.
 - [ ] `growth` - which fund an investor would have preferred, and the path
 - [ ] `sharpe_bar` - families compared, and the equal-weight result
 - [ ] `drawdown` - what the worst episode felt like
