@@ -268,6 +268,52 @@ def main() -> None:
                f"{len(extensions)} fund variants compared "
                f"(gross and net of {COST_BPS:.0f}bp)", t0)
 
+    # --- extension: fear and greed as a market-timing overlay -----------
+    # A different question from the sector tilt: not which sector, but when to
+    # be in the market. Every claim here is checked against a control.
+    print("Extension: fear and greed market timing")
+    z_causal = sn.causal_fear_greed_z(fear_greed)
+    z_full = fear_greed.set_index("date")["fear_greed_z"].shift(1)
+
+    timing_rows = []
+    for method in pf.METHODS:
+        label = pf.fund_name("Combined", method)
+        base_r = funds[label]["returns"]
+        res = fu.fear_greed_timing_fund(base_r, z_causal, cost_bps=COST_BPS)
+        timing_rows.append({
+            "fund": label,
+            "sharpe_base": pf.performance_metrics(base_r, 252)["sharpe"],
+            "sharpe_timed": pf.performance_metrics(res["returns"], 252)["sharpe"],
+            "sharpe_timed_net": pf.performance_metrics(res["returns_net"], 252)["sharpe"],
+            "max_drawdown_base": pf.performance_metrics(base_r, 252)["max_drawdown"],
+            "max_drawdown_timed": pf.performance_metrics(res["returns"], 252)["max_drawdown"],
+            "mean_exposure": res["mean_exposure"],
+            "annual_turnover": res["annual_turnover"],
+        })
+    timing = pd.DataFrame(timing_rows)
+    timing.to_csv(TABLES / "fear_greed_timing.csv", index=False)
+
+    # variants, and the same rule on the look-ahead signal for comparison
+    ref = funds[pf.fund_name("Combined", "risk_parity")]["returns"]
+    fu.fear_greed_study(ref, z_causal, z_full, cost_bps=COST_BPS).to_csv(
+        TABLES / "fear_greed_variants.csv", index=False)
+
+    ref_res = fu.fear_greed_timing_fund(ref, z_causal, cost_bps=COST_BPS)
+    perm = fu.timing_permutation_test(ref, ref_res["exposure"], COST_BPS)
+    sig = fu.bootstrap_sharpe_difference(ref, ref_res["returns_net"], 252)
+    hold = fu.discovery_holdout({"base": ref, "fear-greed timing": ref_res["returns_net"]},
+                                split=HOLDOUT_SPLIT, days_per_year=252, baseline="base")
+    hold.to_csv(TABLES / "fear_greed_holdout.csv", index=False)
+    pd.DataFrame([{**perm, **{f"boot_{k}": v for k, v in sig.items()}}]).to_csv(
+        TABLES / "fear_greed_validation.csv", index=False)
+    pd.DataFrame({"date": ref_res["exposure"].index,
+                  "exposure": ref_res["exposure"].to_numpy()}).to_csv(
+        DATA / "fear_greed_exposure.csv", index=False)
+    t0 = _step(
+        f"timing overlay improves {int((timing.sharpe_timed_net > timing.sharpe_base).sum())}"
+        f"/{len(timing)} combined funds; permutation p={perm['p_value']:.3f}, "
+        f"bootstrap p={sig['p_value']:.3f}", t0)
+
     print("Exhibits")
     combined = [pf.fund_name("Combined", m) for m in pf.METHODS]
     figs.growth_of_one(funds, combined, str(FIGURES / "growth_of_1_combined.png"),

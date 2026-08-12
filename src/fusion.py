@@ -149,6 +149,139 @@ def sign_history(tilt_fn) -> pd.DataFrame:
     return out
 
 
+def fear_greed_timing_fund(fund_returns: pd.Series, z_causal: pd.Series,
+                           strength: float = 0.25,
+                           cost_bps: float = 10.0,
+                           mode: str = "derisk",
+                           monthly: bool = True) -> dict:
+    """A market-timing overlay driven by the fear and greed gauge.
+
+    The gauge is an index, not an asset, so it cannot be held. What it can do
+    is scale a fund's exposure through time, which is a different question
+    from the sector tilt: that one asks which sector to overweight, this one
+    asks when to be in the market at all. The sector tests are silent on it.
+
+    Exposure is capped at 1 and floored at 0, so the fund never borrows and
+    the overlay can only move money to cash. Cash earns the same zero
+    risk-free rate assumed everywhere else, and `cost_bps` is charged on every
+    change in exposure.
+
+    `mode` selects the rule:
+      derisk    cut exposure as the market turns greedy (the only version a
+                long-only fund can act on, since the profitable side of the
+                raw signal would need leverage in a panic)
+      both      scale symmetrically around a neutral gauge
+      contrary  the opposite sign, reported so the direction is not assumed
+    """
+    z = z_causal.reindex(fund_returns.index).fillna(0.0)
+    if monthly:
+        # A fund does not re-time daily. Exposure is set on the first trading
+        # day of each month and held, which matches the rebalance schedule and
+        # keeps the turnover the overlay adds to a realistic level.
+        idx = fund_returns.index
+        first = pd.Series(idx).groupby([idx.year, idx.month]).transform("min")
+        month_start = pd.Series(idx == first.values, index=idx)
+    if mode == "derisk":
+        exposure = (1.0 - strength * z.clip(lower=0.0)).clip(0.0, 1.0)
+    elif mode == "both":
+        exposure = (1.0 - strength * z).clip(0.0, 1.0)
+    elif mode == "contrary":
+        exposure = (1.0 + strength * z.clip(upper=0.0)).clip(0.0, 1.0)
+    else:
+        raise ValueError(f"unknown mode: {mode}")
+
+    if monthly:
+        exposure = exposure.where(month_start).ffill().fillna(1.0)
+    timed = fund_returns * exposure
+    traded = exposure.diff().abs().fillna(0.0)
+    return {
+        "returns": timed,
+        "returns_net": timed - traded * cost_bps / 1e4,
+        "exposure": exposure,
+        "mean_exposure": float(exposure.mean()),
+        "annual_turnover": float(traded.sum() / (len(fund_returns) / 252)),
+        "days_below_full": int((exposure < 0.999).sum()),
+    }
+
+
+def fear_greed_study(fund_returns: pd.Series, z_causal: pd.Series,
+                     z_full_sample: pd.Series,
+                     days_per_year: int = 252,
+                     cost_bps: float = 10.0) -> pd.DataFrame:
+    """Every timing variant against the base fund, and against look-ahead.
+
+    The final rows repeat the best rule on the FULL-SAMPLE z-score. That
+    version is not tradable; it is here to measure how much of any apparent
+    edge comes from standardising on data the fund could not have seen.
+    """
+    from src.portfolios import performance_metrics
+
+    rows = [{
+        "variant": "base fund (no timing)", "signal": "-",
+        "sharpe": performance_metrics(fund_returns, days_per_year)["sharpe"],
+        "sharpe_net_costs": performance_metrics(fund_returns, days_per_year)["sharpe"],
+        "ann_return": performance_metrics(fund_returns, days_per_year)["ann_return"],
+        "max_drawdown": performance_metrics(fund_returns, days_per_year)["max_drawdown"],
+        "mean_exposure": 1.0, "annual_turnover": 0.0,
+    }]
+    for label, z in [("causal", z_causal), ("full-sample (look-ahead)", z_full_sample)]:
+        for mode in ("derisk", "both", "contrary"):
+            r = fear_greed_timing_fund(fund_returns, z, cost_bps=cost_bps, mode=mode)
+            g = performance_metrics(r["returns"], days_per_year)
+            n = performance_metrics(r["returns_net"], days_per_year)
+            rows.append({
+                "variant": mode, "signal": label,
+                "sharpe": g["sharpe"], "sharpe_net_costs": n["sharpe"],
+                "ann_return": g["ann_return"], "max_drawdown": g["max_drawdown"],
+                "mean_exposure": r["mean_exposure"],
+                "annual_turnover": r["annual_turnover"],
+            })
+    return pd.DataFrame(rows)
+
+
+def timing_permutation_test(fund_returns: pd.Series, exposure: pd.Series,
+                            cost_bps: float = 10.0, n_perm: int = 1000,
+                            days_per_year: int = 252, seed: int = 0) -> dict:
+    """Is it the timing, or just the exposure profile?
+
+    The overlay changes two things at once: how much of the fund is held on
+    average, and when. Shuffling the exposure series through time holds the
+    first fixed - the same values, the same turnover, the same average - and
+    destroys only the second. If the real ordering is no better than a random
+    one, the signal contributes nothing and the result is a property of the
+    exposure profile rather than of the gauge.
+
+    A constant-exposure control is reported alongside, though it settles less
+    than it appears to: the Sharpe ratio is invariant to scaling returns by a
+    constant, so that comparison is arithmetic rather than evidence.
+    """
+    from src.portfolios import performance_metrics
+
+    def net(e: pd.Series) -> pd.Series:
+        return fund_returns * e - e.diff().abs().fillna(0.0) * cost_bps / 1e4
+
+    actual = performance_metrics(net(exposure), days_per_year)["sharpe"]
+    rng = np.random.default_rng(seed)
+    values = exposure.to_numpy()
+    draws = np.empty(n_perm)
+    for k in range(n_perm):
+        shuffled = pd.Series(values[rng.permutation(len(values))],
+                             index=exposure.index)
+        draws[k] = performance_metrics(net(shuffled), days_per_year)["sharpe"]
+    beaten = float((draws < actual).mean())
+    return {
+        "sharpe_actual": actual,
+        "sharpe_constant_exposure": performance_metrics(
+            fund_returns * float(exposure.mean()), days_per_year)["sharpe"],
+        "perm_mean": float(draws.mean()),
+        "perm_p95": float(np.percentile(draws, 95)),
+        "perm_max": float(draws.max()),
+        "share_beaten": beaten,
+        "p_value": 1.0 - beaten,
+        "n_perm": n_perm,
+    }
+
+
 def lead_lag_diagnostics(sector_index: pd.DataFrame,
                          equity_returns: pd.DataFrame,
                          ticker_sector: pd.Series) -> pd.DataFrame:

@@ -1,0 +1,2 @@
+sharpe_actual,sharpe_constant_exposure,perm_mean,perm_p95,perm_max,share_beaten,p_value,n_perm,boot_sharpe_base,boot_sharpe_variant,boot_difference,boot_ci_low,boot_ci_high,boot_p_value,boot_significant_5pct,boot_n_days,boot_n_boot
+1.1130536718991406,0.8881388371221647,0.6001248415315654,0.7747531010028839,0.9353404274606096,1.0,0.0,1000,0.8887291587806443,1.1137934883130935,0.22506432953244926,0.010767232841808841,0.4534797020476447,0.038,True,753,5000

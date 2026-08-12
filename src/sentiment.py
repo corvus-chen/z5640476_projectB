@@ -151,6 +151,26 @@ def fear_greed_index(ticker_day: pd.DataFrame,
     return market.reset_index()
 
 
+def causal_fear_greed_z(index: pd.DataFrame, min_obs: int = 252,
+                        lag_days: int = 1) -> pd.Series:
+    """The fear and greed gauge standardised with past data only.
+
+    `fear_greed_index` standardises on the whole sample, which is correct for
+    describing history and wrong for trading it: the z-score on a day in 2020
+    is computed against a mean and standard deviation that include 2023. That
+    is look-ahead hiding inside a preprocessing step rather than inside the
+    backtest, which makes it easy to miss.
+
+    Here the mean and standard deviation expand over past observations only,
+    the series is shifted so day t uses information from t-1 or earlier, and
+    nothing is emitted until `min_obs` observations have accumulated.
+    """
+    s = index.set_index("date")["fear_greed_smoothed"].sort_index()
+    past = s.shift(1)
+    z = (s - past.expanding(min_obs).mean()) / past.expanding(min_obs).std()
+    return z.shift(lag_days).rename("fear_greed_z_causal")
+
+
 def fear_greed_extremes(index: pd.DataFrame, n: int = 5) -> pd.DataFrame:
     """The deepest fear and highest greed days, for the report and the app."""
     df = index.dropna(subset=["fear_greed_z"])
