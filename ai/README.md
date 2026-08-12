@@ -1,16 +1,70 @@
-# AI workflow pack (graded)
+# AI workflow pack (z5640476, Part B)
 
-Keep evidence of how you used AI here. This is assessed on four things:
-1. Completeness - your agent files and prompt logs are all present.
-2. Critical evaluation - you show where AI was wrong and how you caught it.
-3. Appropriate use - sensible decisions about when to use AI and when not to.
-4. Honesty - an accurate account of what AI did versus what you did.
+Everything the course asks me to submit about how I directed and checked AI on
+this project, and where to find each piece.
 
-What to put here:
-- prompt_log_template.md - copy it per task and fill it in.
-- any exported chat logs or transcripts.
-- a short AI_NOTES.md describing, in your own words, how you directed and checked AI.
+## What is here, and what it is for
 
-Your own agent instruction files live at the project root (AGENTS.md / CLAUDE.md /
-.claude / GEMINI.md, whichever your tool uses). Replace the provided stubs with
-your own.
+| Evidence | Where |
+|---|---|
+| My agent instruction file | `../CLAUDE.md` at the project root |
+| My rules - the standards I made the assistant work to | `../.claude/rules/` |
+| My skills - the workflows I invoke rather than re-explain | `../.claude/skills/` |
+| Prompt logs, one per stage of the build | `log_01` to `log_07` in this folder |
+| Iteration history - every change with its reason | the commit history, see below |
+
+`prompt_log_template.md` is the starter's template, kept for reference.
+
+## The rules I set
+
+`../.claude/rules/` holds the three standards the assistant had to work to,
+each written after I saw why it was needed:
+
+- `no-lookahead.md` - the one rule I would not accept a violation of, and the
+  truncation test that has to prove compliance rather than an argument that it
+  complies.
+- `verify-numbers.md` - no statistic from memory, including the assistant's
+  memory of its own earlier work. Written after it wrote "30 rows dropped"
+  from recollection when the measured answer was 6 (log_01).
+- `my-words-not-yours.md` - where the assistant stops and my own economic
+  interpretation begins.
+
+`../.claude/skills/` holds three workflows I invoke by name: `audit-backtest`
+before any new number reaches the report, `check-exhibit` after any figure
+changes, and `log-session` to draft the factual half of an entry here.
+
+## Iteration history
+
+The version history is the record of how the project actually developed, and
+it is not visible in the zip. It is in the public repository:
+
+**https://github.com/corvus-chen/z5640476_projectB/commits/main**
+
+Each commit message states what changed and why. The ones that matter most are
+the corrections: the weight-drift accounting fix, the trim to the word limit,
+and the addition of the rolling-versus-expanding window study.
+
+## How to read the logs
+
+Each entry separates what the assistant produced from what I judged. The
+factual sections record prompts, output, and measurements; the sections headed
+"What was wrong or risky" and "What I changed and why" are mine.
+
+Read in order, they describe one recurring failure rather than seven separate
+ones. Every serious error in this project was a failure of verification rather
+than of modelling:
+
+- a number recalled instead of measured (log_01)
+- a solver that silently returns its starting point (log_02)
+- an explanation that fitted all the evidence because it had never been tested
+  against a rival (log_03)
+- an extension whose value turned out to be the tests it forced me to run
+  (log_04)
+- gaps that no internal check could find, because every standard I was
+  checking against came from inside the project (log_05)
+- a docstring that accurately described the wrong behaviour, and a test suite
+  that only ever exercised the defaults (log_06)
+- prose that reads as reasoned whether or not it was reasoned (log_07)
+
+`../report/REVISION_CHECKLIST.md` tracks the passages of the report that are
+still the assistant's wording rather than mine.
